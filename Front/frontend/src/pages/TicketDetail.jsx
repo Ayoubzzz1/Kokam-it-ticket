@@ -8,6 +8,19 @@ import {
   STATUS_LABELS,
   formatDate,
 } from '../utils/labels'
+import { Bubble, BubbleContent, BubbleGroup, BubbleReactions } from '../components/ui/bubble'
+import { Button } from '../components/ui/button'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '../components/ui/drawer'
+import { Textarea } from '../components/ui/textarea'
 
 export default function TicketDetail() {
   const { id } = useParams()
@@ -346,40 +359,53 @@ export default function TicketDetail() {
           {/* Comments Section */}
           <section className="card full-card">
             <h3>Conversation</h3>
-            <div className="comments-thread">
+            <BubbleGroup className="comments-thread" role="log" aria-label="Conversation du ticket">
               {ticket.comments.length === 0 ? (
                 <p className="empty-message">Aucun commentaire pour le moment</p>
               ) : (
                 ticket.comments.map((c) => (
-                  <div key={c.id} className={`comment ${c.author_role === 'technician' ? 'comment-staff' : 'comment-user'}`}>
-                    <div className="comment-header">
-                      <strong>
-                        {c.author_name}
-                        {c.author_role === 'technician' && <span className="badge-staff">IT</span>}
-                      </strong>
-                      <time>{formatDate(c.created_at)}</time>
+                  <Bubble key={c.id} align={c.author_id === user.id ? 'end' : 'start'}>
+                    <div>
+                      <BubbleContent variant={c.author_role === 'technician' ? 'tinted' : 'secondary'}>
+                        <strong className="mb-1 block text-xs">{c.author_name}{c.author_role === 'technician' && ' · IT'}</strong>
+                        <span>{c.message}</span>
+                      </BubbleContent>
+                      <BubbleReactions className={c.author_id === user.id ? 'justify-end' : 'justify-start'}>
+                        <time>{formatDate(c.created_at)}</time>
+                      </BubbleReactions>
                     </div>
-                    <p className="comment-text">{c.message}</p>
-                  </div>
+                  </Bubble>
                 ))
               )}
-            </div>
+            </BubbleGroup>
 
-            <form onSubmit={addComment} className="comment-form">
-              <textarea
-                rows="4"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Écrire un commentaire…"
-                maxLength="2000"
-              />
-              <div className="form-footer">
-                <span className="char-count">{message.length}/2000</span>
-                <button className="btn btn-primary" type="submit" disabled={!message.trim()}>
-                  Envoyer
-                </button>
-              </div>
-            </form>
+            <Drawer>
+              <DrawerTrigger render={<Button variant="outline" />}>Ajouter un commentaire</DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Nouveau commentaire</DrawerTitle>
+                  <DrawerDescription>Votre message sera visible par le demandeur et l'équipe IT.</DrawerDescription>
+                </DrawerHeader>
+                <form onSubmit={addComment} className="comment-form p-4">
+                  <Textarea
+                    rows="4"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Écrire un commentaire…"
+                    maxLength="2000"
+                  />
+                  <DrawerFooter className="px-0">
+                    <div className="form-footer">
+                      <span className="char-count">{message.length}/2000</span>
+                      <div className="flex gap-2">
+                        <DrawerClose render={<Button type="button" variant="ghost" />}>Annuler</DrawerClose>
+                        <Button type="submit" disabled={!message.trim()}>Envoyer</Button>
+                      </div>
+                    </div>
+                  </DrawerFooter>
+                </form>
+              </DrawerContent>
+            </Drawer>
           </section>
         </div>
       </div>

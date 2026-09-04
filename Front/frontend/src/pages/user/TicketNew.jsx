@@ -3,6 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import api from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { PRIORITIES, PRIORITY_LABELS } from '../../utils/labels'
+import { ArrowLeft, LifeBuoy, Paperclip, Send } from 'lucide-react'
+import { Button } from '../../components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Textarea } from '../../components/ui/textarea'
 
 export default function TicketNew() {
   const navigate = useNavigate()
@@ -52,14 +57,23 @@ export default function TicketNew() {
   }
 
   return (
-    <form className="card form" onSubmit={onSubmit}>
-      <h2>Signaler un problème</h2>
-      <p className="muted">La demande est envoyée à l’espace IT. Vous n’avez pas à choisir un technicien.</p>
-      {error && <div className="alert error">{error}</div>}
+    <div className="mx-auto w-full max-w-4xl">
+      <Button variant="ghost" size="sm" className="mb-4 text-muted-foreground" type="button" onClick={() => navigate('/dashboard')}>
+        <ArrowLeft className="size-4" /> Retour au tableau de bord
+      </Button>
+      <Card className="overflow-hidden border-border/70 shadow-sm">
+        <CardHeader className="border-b bg-gradient-to-br from-blue-50 to-white px-6 py-6">
+          <div className="flex items-start gap-4">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm"><LifeBuoy className="size-5" /></span>
+            <div><CardTitle className="text-2xl">Signaler un problème</CardTitle><CardDescription className="mt-1">Décrivez votre besoin. L'équipe IT recevra votre demande immédiatement.</CardDescription></div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <form className="grid gap-5" onSubmit={onSubmit}>
+          {error && <div className="alert error" role="alert">{error}</div>}
 
-      <label>
-        Catégorie
-        <select value={form.category} onChange={(e) => setField('category', e.target.value)} required>
+      <label className="grid gap-2 text-sm font-medium text-foreground">
+        Catégorie <select className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm" value={form.category} onChange={(e) => setField('category', e.target.value)} required>
           <option value="">Sélectionner</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
@@ -69,24 +83,15 @@ export default function TicketNew() {
         </select>
       </label>
 
-      <label>
-        Service destinataire
-        <input value="IT" readOnly />
-      </label>
+      <div className="grid gap-5 sm:grid-cols-3">
+      <label className="grid gap-2 text-sm font-medium text-foreground">Service destinataire<Input value="IT" readOnly /></label>
+      <label className="grid gap-2 text-sm font-medium text-foreground">Demandeur<Input value={user?.full_name || ''} readOnly /></label>
+      <label className="grid gap-2 text-sm font-medium text-foreground">Bureau<Input value={user?.office || '—'} readOnly /></label>
+      </div>
 
-      <label>
-        Demandeur
-        <input value={user?.full_name || ''} readOnly />
-      </label>
-
-      <label>
-        Bureau
-        <input value={user?.office || '—'} readOnly />
-      </label>
-
-      <label>
+      <label className="grid gap-2 text-sm font-medium text-foreground">
         Titre
-        <input
+        <Input
           value={form.title}
           onChange={(e) => setField('title', e.target.value)}
           required
@@ -94,9 +99,9 @@ export default function TicketNew() {
         />
       </label>
 
-      <label>
+      <label className="grid gap-2 text-sm font-medium text-foreground">
         Description
-        <textarea
+        <Textarea
           rows="5"
           value={form.description}
           onChange={(e) => setField('description', e.target.value)}
@@ -105,9 +110,9 @@ export default function TicketNew() {
         />
       </label>
 
-      <label>
+      <label className="grid gap-2 text-sm font-medium text-foreground">
         Priorité
-        <select value={form.priority} onChange={(e) => setField('priority', e.target.value)}>
+        <select className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm" value={form.priority} onChange={(e) => setField('priority', e.target.value)}>
           {PRIORITIES.map((p) => (
             <option key={p} value={p}>
               {PRIORITY_LABELS[p]}
@@ -116,14 +121,19 @@ export default function TicketNew() {
         </select>
       </label>
 
-      <label>
-        Pièce jointe (optionnel)
-        <input type="file" name="attachment" />
+      <label className="grid gap-2 text-sm font-medium text-foreground">
+        <span className="flex items-center gap-2"><Paperclip className="size-4 text-muted-foreground" /> Pièce jointe <span className="font-normal text-muted-foreground">(optionnel)</span></span>
+        <Input type="file" name="attachment" />
       </label>
 
-      <button className="btn primary" type="submit" disabled={submitting}>
-        {submitting ? 'Envoi…' : 'Envoyer à l’IT'}
-      </button>
-    </form>
+      <div className="flex justify-end border-t border-border pt-5">
+        <Button className="bg-[#1769e0] text-white hover:bg-[#0d58c7]" type="submit" disabled={submitting}>
+          <Send className="size-4" /> {submitting ? 'Envoi...' : 'Envoyer à l’IT'}
+        </Button>
+      </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

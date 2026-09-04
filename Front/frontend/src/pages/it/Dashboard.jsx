@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api from '../../api/client'
 import { PRIORITY_LABELS, STATUS_LABELS } from '../../utils/labels'
-import { formatDate } from '../../utils/labels'
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table'
 
 export default function ITDashboard() {
   const [data, setData] = useState(null)
@@ -24,17 +25,15 @@ export default function ITDashboard() {
           ['Urgents', data.urgent],
           ['Terminés', data.resolved],
         ].map(([label, value]) => (
-          <div className="stat" key={label}>
+          <Card className="stat" key={label}><CardContent className="p-0">
             <span>{label}</span>
             <strong>{value}</strong>
-          </div>
+          </CardContent></Card>
         ))}
       </div>
       <h2 className="section-title">Tickets récents reçus</h2>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
+      <Card className="p-0"><CardHeader className="border-b"><CardTitle>Tickets récents reçus</CardTitle></CardHeader><CardContent className="p-0"><Table>
+          <TableHeader><TableRow>
               <th>Ticket</th>
               <th>Demandeur</th>
               <th>Service</th>
@@ -43,30 +42,18 @@ export default function ITDashboard() {
               <th>Catégorie</th>
               <th>Priorité</th>
               <th>Statut</th>
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow></TableHeader><TableBody>
             {data.recent.map((t) => (
-              <tr key={t.id}>
-                <td>
+              <TableRow key={t.id}><TableCell>
                   <Link to={`/it/tickets/${t.id}`}>{t.display_number}</Link>
-                </td>
-                <td>{t.created_by_name}</td>
-                <td>{t.created_by_department || '—'}</td>
-                <td>{t.created_by_job_position || '—'}</td>
-                <td>{t.created_by_office || '—'}</td>
-                <td>{t.category_name}</td>
-                <td>
+                </TableCell><TableCell>{t.created_by_name}</TableCell><TableCell>{t.created_by_department || '—'}</TableCell><TableCell>{t.created_by_job_position || '—'}</TableCell><TableCell>{t.created_by_office || '—'}</TableCell><TableCell>{t.category_name}</TableCell><TableCell>
                   <span className={`badge prio-${t.priority}`}>{PRIORITY_LABELS[t.priority]}</span>
-                </td>
-                <td>
+                </TableCell><TableCell>
                   <span className={`badge status-${t.status}`}>{STATUS_LABELS[t.status]}</span>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody></Table></CardContent></Card>
     </div>
   )
 }

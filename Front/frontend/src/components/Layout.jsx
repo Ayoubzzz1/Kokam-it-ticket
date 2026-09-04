@@ -1,6 +1,14 @@
 import { useEffect, useState, useRef } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { Avatar, AvatarFallback } from './ui/avatar'
+import { ChevronDown, LogOut, Menu, UserRound } from 'lucide-react'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from './ui/navigation-menu'
 
 const NAV = {
   user: [
@@ -162,7 +170,11 @@ export default function Layout() {
   const overlayRef = useRef(null)
 
   const items = NAV[user?.role] || NAV.user
-  const space = SPACE[user?.role] || SPACE.user
+  const accountService = user?.department_name || (typeof user?.department === 'object' ? user.department?.name : '')
+  const space = accountService
+    ? `Espace ${accountService}`
+    : SPACE[user?.role] || 'Espace utilisateur'
+  const quickLinks = items.slice(0, 4)
 
   function onLogout() {
     logout()
@@ -246,7 +258,8 @@ export default function Layout() {
         <div className="sidebar-header">
           <div className="brand">
             <img src="/logo.PNG" alt="Logo" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
-            <div>
+            <div className="brand-copy">
+              <strong className="brand-name">KOKAM PLUS</strong>
               <p className="brand-label">{space}</p>
             </div>
           </div>
@@ -297,26 +310,35 @@ export default function Layout() {
         {/* Topbar */}
         <header className="topbar">
           <button
-            className="sidebar-toggle"
+            className="sidebar-toggle navbar-icon-button"
             type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="Ouvrir le menu"
             aria-controls="main-navigation"
             aria-expanded={sidebarOpen}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
+            <Menu className="size-5" />
           </button>
 
           <div className="topbar-content">
             <div className="topbar-greeting">
-              <h1>Bonjour, {user?.first_name || user?.full_name || 'utilisateur'} 👋</h1>
-              <p>Bienvenue dans {space.toLowerCase()}</p>
+              <p className="navbar-context">{space}</p>
+              <h1>Bonjour, {user?.first_name || user?.full_name || 'utilisateur'} <span aria-hidden="true">👋</span></h1>
+              <p>Suivez vos demandes et leur avancement</p>
             </div>
           </div>
+
+          <NavigationMenu className="topbar-navigation" aria-label="Raccourcis">
+            <NavigationMenuList>
+              {quickLinks.map((item) => (
+                <NavigationMenuItem key={item.to}>
+                  <NavigationMenuLink render={<NavLink to={item.to} end />}>
+                    {item.label}
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
 
           <div className="topbar-actions">
             <div className="user-menu-wrapper">
@@ -326,32 +348,18 @@ export default function Layout() {
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
               >
-                <div className="user-avatar">
-                  {(user?.first_name?.[0] || user?.full_name?.[0] || 'U').toUpperCase()}
-                </div>
+                <Avatar className="user-avatar"><AvatarFallback className="bg-primary text-white">{(user?.first_name?.[0] || user?.full_name?.[0] || 'U').toUpperCase()}</AvatarFallback></Avatar>
                 <div className="user-info">
                   <span className="user-name">{user?.full_name || 'Utilisateur'}</span>
                   <span className="user-role">{space}</span>
                 </div>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  className={`chevron ${userMenuOpen ? 'open' : ''}`}
-                  aria-hidden="true"
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                <ChevronDown className={`chevron size-4 ${userMenuOpen ? 'open' : ''}`} aria-hidden="true" />
               </button>
 
               {userMenuOpen && (
                 <div className="user-dropdown">
                   <div className="dropdown-header">
-                    <div className="user-avatar-large">
-                      {(user?.first_name?.[0] || user?.full_name?.[0] || 'U').toUpperCase()}
-                    </div>
+                    <Avatar size="lg" className="user-avatar-large"><AvatarFallback className="bg-primary text-white">{(user?.first_name?.[0] || user?.full_name?.[0] || 'U').toUpperCase()}</AvatarFallback></Avatar>
                     <div>
                       <p className="dropdown-name">{user?.full_name || 'Utilisateur'}</p>
                       <p className="dropdown-email">{user?.email || '—'}</p>
@@ -364,18 +372,11 @@ export default function Layout() {
                     className="dropdown-item"
                     onClick={() => setUserMenuOpen(false)}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
+                    <UserRound className="size-4" />
                     Mon profil
                   </NavLink>
                   <button className="dropdown-item logout-item" onClick={onLogout}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14"></path>
-                      <polyline points="16 7 20 11 16 15"></polyline>
-                      <line x1="20" y1="11" x2="9" y2="11"></line>
-                    </svg>
+                    <LogOut className="size-4" />
                     Déconnexion
                   </button>
                 </div>
