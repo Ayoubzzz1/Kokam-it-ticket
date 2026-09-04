@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import BrandLogo from './BrandLogo'
 import { useAuth } from '../context/AuthContext'
 
 const NAV = {
@@ -159,6 +158,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const overlayRef = useRef(null)
 
   const items = NAV[user?.role] || NAV.user
   const space = SPACE[user?.role] || SPACE.user
@@ -168,40 +168,80 @@ export default function Layout() {
     navigate('/login')
   }
 
-  function closeMobileSidebar() {
+  function closeSidebar() {
     setSidebarOpen(false)
   }
 
+  function handleOverlayClick(e) {
+    if (e.target === overlayRef.current) {
+      closeSidebar()
+    }
+  }
+
+  // Close sidebar on route change
   useEffect(() => {
-    function closeOnEscape(event) {
-      if (event.key === 'Escape') setSidebarOpen(false)
+    closeSidebar()
+  }, [])
+
+  // Handle keyboard escape
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape' && sidebarOpen) {
+        closeSidebar()
+      }
     }
 
-    function closeOnDesktop() {
-      if (window.innerWidth > 768) setSidebarOpen(false)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [sidebarOpen])
+
+  // Lock body scroll on mobile when sidebar is open
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      if (sidebarOpen) {
+        document.body.style.overflow = 'hidden'
+        document.body.style.position = 'fixed'
+        document.body.style.width = '100%'
+      } else {
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+      }
     }
 
-    document.addEventListener('keydown', closeOnEscape)
-    window.addEventListener('resize', closeOnDesktop)
-    document.body.style.overflow = sidebarOpen ? 'hidden' : ''
     return () => {
-      document.removeEventListener('keydown', closeOnEscape)
-      window.removeEventListener('resize', closeOnDesktop)
       document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.width = ''
     }
   }, [sidebarOpen])
 
+  // Close sidebar on resize to desktop
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 768) {
+        closeSidebar()
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   return (
     <div className={`app-shell role-${user?.role || 'user'}`}>
-      {sidebarOpen && (
-        <button
-          className="sidebar-overlay"
-          type="button"
-          aria-label="Fermer le menu"
-          onClick={closeMobileSidebar}
-        />
-      )}
+      {/* Overlay */}
+      <button
+        ref={overlayRef}
+        className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+        type="button"
+        aria-label="Fermer le menu"
+        onClick={handleOverlayClick}
+        aria-hidden={!sidebarOpen}
+        tabIndex={sidebarOpen ? 0 : -1}
+      />
 
+      {/* Sidebar */}
       <aside
         id="main-navigation"
         className={`sidebar ${sidebarOpen ? 'open' : ''}`}
@@ -209,7 +249,7 @@ export default function Layout() {
       >
         <div className="sidebar-header">
           <div className="brand">
-            <BrandLogo variant="sidebar" />
+            <img src="/logo.PNG" alt="Logo" style={{ width: '44px', height: '44px', objectFit: 'contain' }} />
             <div>
               <p className="brand-label">{space}</p>
             </div>
@@ -217,7 +257,7 @@ export default function Layout() {
           <button
             className="sidebar-close"
             type="button"
-            onClick={() => setSidebarOpen(false)}
+            onClick={closeSidebar}
             aria-label="Fermer le menu"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -234,7 +274,7 @@ export default function Layout() {
               to={item.to}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
               end={item.to.split('/').length <= 3}
-              onClick={closeMobileSidebar}
+              onClick={closeSidebar}
             >
               <span className="nav-icon">
                 <NavIcon name={item.icon} />
@@ -256,7 +296,9 @@ export default function Layout() {
         </div>
       </aside>
 
+      {/* Main Container */}
       <div className="main-container">
+        {/* Topbar */}
         <header className="topbar">
           <button
             className="sidebar-toggle"
@@ -286,6 +328,7 @@ export default function Layout() {
                 className="user-chip"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 aria-expanded={userMenuOpen}
+                aria-haspopup="true"
               >
                 <div className="user-avatar">
                   {(user?.first_name?.[0] || user?.full_name?.[0] || 'U').toUpperCase()}
@@ -301,6 +344,7 @@ export default function Layout() {
                   fill="none"
                   stroke="currentColor"
                   className={`chevron ${userMenuOpen ? 'open' : ''}`}
+                  aria-hidden="true"
                 >
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
@@ -319,7 +363,11 @@ export default function Layout() {
                     </div>
                   </div>
                   <div className="dropdown-divider"></div>
-                  <NavLink to="/profile" className="dropdown-item" onClick={() => setUserMenuOpen(false)}>
+                  <NavLink
+                    to="/profile"
+                    className="dropdown-item"
+                    onClick={() => setUserMenuOpen(false)}
+                  >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                       <circle cx="12" cy="7" r="4"></circle>
@@ -340,6 +388,7 @@ export default function Layout() {
           </div>
         </header>
 
+        {/* Content */}
         <main className="content">
           <Outlet />
         </main>
