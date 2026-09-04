@@ -202,7 +202,11 @@ export default function Layout() {
         />
       )}
 
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
+      <aside
+        id="main-navigation"
+        className={`sidebar ${sidebarOpen ? 'open' : ''}`}
+        aria-label="Navigation principale"
+      >
         <div className="sidebar-header">
           <div className="brand">
             <BrandLogo variant="sidebar" />
@@ -212,8 +216,9 @@ export default function Layout() {
           </div>
           <button
             className="sidebar-close"
+            type="button"
             onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
+            aria-label="Fermer le menu"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -257,7 +262,8 @@ export default function Layout() {
             className="sidebar-toggle"
             type="button"
             onClick={() => setSidebarOpen(true)}
-            aria-label="Open sidebar"
+            aria-label="Ouvrir le menu"
+            aria-controls="main-navigation"
             aria-expanded={sidebarOpen}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
