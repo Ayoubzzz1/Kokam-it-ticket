@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kokam-plus-shell-v1'
+const CACHE_NAME = 'kokam-plus-shell-v2'
 const APP_SHELL = ['/','/index.html','/manifest.webmanifest','/logo.PNG']
 
 self.addEventListener('install', (event) => {
@@ -21,7 +21,16 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || requestUrl.pathname.startsWith('/api/')) return
 
   if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).catch(() => caches.match('/index.html')))
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.match('/index.html').then((cached) =>
+          cached || new Response('Application unavailable offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain' },
+          })
+        )
+      )
+    )
     return
   }
 
