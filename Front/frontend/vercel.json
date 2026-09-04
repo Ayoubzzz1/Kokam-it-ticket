@@ -3,7 +3,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://backend-tlcw.vercel.app/api/$1"
+      "dest": "https://kokam-it-ticket-5kz9.vercel.app/api/$1"
     },
     {
       "handle": "filesystem"

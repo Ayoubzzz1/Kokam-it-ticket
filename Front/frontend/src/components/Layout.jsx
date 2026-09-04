@@ -28,6 +28,7 @@ const NAV = {
   hr: [
     { to: '/hr/dashboard', label: 'Demandes RH', icon: 'dashboard' },
     { to: '/hr/attendance', label: 'Absences', icon: 'calendar' },
+    { to: '/absence', label: 'Mon absence', icon: 'calendar' },
     { to: '/leave-request', label: 'Demande de congé', icon: 'plus' },
     { to: '/advance-request', label: "Demande d'avance", icon: 'wallet' },
     { to: '/general-request', label: 'Demandes', icon: 'folder' },
@@ -177,11 +178,6 @@ export default function Layout() {
       closeSidebar()
     }
   }
-
-  // Close sidebar on route change
-  useEffect(() => {
-    closeSidebar()
-  }, [])
 
   // Handle keyboard escape
   useEffect(() => {

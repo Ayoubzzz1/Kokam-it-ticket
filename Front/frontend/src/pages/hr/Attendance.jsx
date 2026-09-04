@@ -100,11 +100,11 @@ export default function HrAttendance() {
           <div className="stat"><span>Congés</span><strong>{totals.leave}</strong></div>
           <div className="stat"><span>Jours renseignés</span><strong>{totals.filled}</strong></div>
         </div>
-        <div className="attendance-guide"><span><b className="dot dot-present" /> P = Présent</span><span><b className="dot dot-absent" /> A = Absent</span><span><b className="dot dot-leave" /> C = Congé</span><span><b className="dot dot-holiday" /> F = Jour férié</span></div>
-        <div className="table-wrap attendance-grid-wrap"><table className="attendance-grid"><thead><tr><th className="employee-column">Collaborateur</th>{(data.dates || []).map((item) => <th key={item.date} title={item.weekday}>{dateLabel(item.date)}</th>)}<th>Total P</th><th>Total A</th></tr></thead><tbody>
+        <div className="attendance-guide"><strong>Saisir le statut du jour</strong><span><b className="dot dot-present" /> P Présent</span><span><b className="dot dot-absent" /> A Absent</span><span><b className="dot dot-leave" /> C Congé</span><span><b className="dot dot-holiday" /> F Férié</span><span className="attendance-hint">Les modifications sont enregistrées automatiquement</span></div>
+        <div className="attendance-grid-frame"><div className="attendance-grid-scroll"><table className="attendance-grid"><thead><tr><th className="employee-column">Collaborateur</th>{(data.dates || []).map((item) => <th key={item.date} title={item.weekday}><span>{dateLabel(item.date)}</span><small>{item.weekday.slice(0, 3)}</small></th>)}<th>Total P</th><th>Total A</th></tr></thead><tbody>
           {rows.length === 0 && <tr><td colSpan={(data.dates?.length || 0) + 3}>Aucun collaborateur trouvé.</td></tr>}
           {rows.map((row) => <tr key={row.user}><th className="employee-column"><strong>{row.user_name}</strong><small>{row.department}</small></th>{row.days.map((cell) => { const key = `${row.user}-${cell.date}`; return <td className={`attendance-cell presence-${cell.presence || 'empty'}`} key={cell.date}><select aria-label={`${row.user_name}, ${cell.date}`} value={cell.presence} disabled={saving === key} onChange={(event) => updateAttendance(row, cell, event.target.value)}><option value="">—</option>{PRESENCE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></td> })}<td className="total-cell">{row.present_days}</td><td className="total-cell">{row.absent_days}</td></tr>)}
-        </tbody></table></div>
+        </tbody></table></div><p className="attendance-scroll-hint">Faites défiler horizontalement pour consulter tous les jours du mois.</p></div>
       </>}
     </div>
   )

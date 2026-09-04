@@ -1133,3 +1133,191 @@ tr:hover td {
     transform: rotate(360deg);
   }
 }
+
+/* HR attendance grid */
+.attendance-page {
+  min-width: 0;
+}
+
+.attendance-page .attendance-filters {
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.attendance-page .attendance-filters input,
+.attendance-page .attendance-filters select {
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+.attendance-page .attendance-filters input {
+  min-width: 260px;
+}
+
+.attendance-guide {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.attendance-guide strong {
+  color: var(--text-h);
+  margin-right: 4px;
+}
+
+.attendance-guide span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.attendance-hint {
+  margin-left: auto;
+  font-style: italic;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-present { background: #10b981; }
+.dot-absent { background: #ef4444; }
+.dot-leave { background: #f59e0b; }
+.dot-holiday { background: #8b5cf6; }
+
+.attendance-grid-frame {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.attendance-grid-scroll {
+  max-height: calc(100vh - 330px);
+  min-height: 240px;
+  overflow: auto;
+}
+
+.attendance-grid {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+}
+
+.attendance-grid th,
+.attendance-grid td {
+  min-width: 42px;
+  padding: 7px 4px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid #edf1f6;
+}
+
+.attendance-grid thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 52px;
+  color: var(--muted);
+  background: #f6f9fc;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.attendance-grid thead th span,
+.attendance-grid thead th small {
+  display: block;
+}
+
+.attendance-grid thead th small {
+  margin-top: 3px;
+  color: var(--muted-2);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.attendance-grid .employee-column {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  width: 210px;
+  min-width: 210px;
+  text-align: left;
+  background: var(--surface);
+}
+
+.attendance-grid thead .employee-column {
+  z-index: 5;
+  background: #f6f9fc;
+}
+
+.attendance-grid tbody tr:hover td,
+.attendance-grid tbody tr:hover .employee-column {
+  background: #f7faff;
+}
+
+.attendance-grid .employee-column strong,
+.attendance-grid .employee-column small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attendance-grid .employee-column small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.attendance-cell select {
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-h);
+  background: transparent;
+  font-weight: 800;
+  text-align: center;
+  cursor: pointer;
+}
+
+.attendance-cell select:hover { border-color: var(--border-strong); background: #fff; }
+.attendance-cell select:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.attendance-cell select:disabled { cursor: wait; opacity: 0.55; }
+.attendance-cell.presence-present { background: #ecfdf5; }
+.attendance-cell.presence-absent { background: #fef2f2; }
+.attendance-cell.presence-leave,
+.attendance-cell.presence-holiday { background: #fffbeb; }
+.total-cell { color: var(--primary); font-weight: 800; background: #f8fbff; }
+
+.attendance-scroll-hint {
+  display: none;
+  margin: 0;
+  padding: 9px 12px;
+  color: var(--muted);
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+}
+
+@media (max-width: 768px) {
+  .attendance-page .attendance-filters { display: grid; grid-template-columns: 1fr 1fr; }
+  .attendance-page .attendance-filters input { grid-column: 1 / -1; min-width: 0; }
+  .attendance-guide { align-items: flex-start; }
+  .attendance-hint { width: 100%; margin-left: 0; }
+  .attendance-grid-scroll { max-height: calc(100dvh - 350px); }
+  .attendance-scroll-hint { display: block; }
+}
