@@ -332,15 +332,21 @@ export default function Login() {
   return (
     <>
       <style>{styles}</style>
-      <div className="auth-screen">
-        <form className="auth-card" onSubmit={onSubmit}>
+      <div className="auth-screen login-modern">
+        <div className="login-backdrop" aria-hidden="true">
+          <span className="backdrop-grid" />
+          <span className="backdrop-orb backdrop-orb-one" />
+          <span className="backdrop-orb backdrop-orb-two" />
+        </div>
+        <form className="auth-card login-modern-card" onSubmit={onSubmit}>
           <div className="login-header">
             <div className="logo-container">
               <img src="/logo.PNG" alt="Logo" style={{ width: '50px', height: '50px', objectFit: 'contain' }} />
             </div>
             <div>
+              <p className="login-kicker">KOKAM PLUS · SUPPORT</p>
               <h1>IT Helpdesk</h1>
-              <p className="subtitle">Connectez-vous à votre espace</p>
+              <p className="subtitle">Accédez à votre espace de travail</p>
             </div>
           </div>
 
@@ -443,7 +449,7 @@ export default function Login() {
           </button>
 
           <div className="signup-section">
-            <p>Compte créé par l'administration uniquement.</p>
+            <p>Un accès professionnel pour suivre vos demandes en toute simplicité.</p>
           </div>
         </form>
       </div>
