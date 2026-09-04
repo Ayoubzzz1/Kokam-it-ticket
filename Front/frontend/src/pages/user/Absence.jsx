@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import api from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { PRESENCE_LABELS } from '../../utils/labels'
@@ -10,10 +10,10 @@ function dateLabel(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString('fr-FR', { day: '2-digit' })
 }
 
-export default function Absence() {
+export default function Absence({ hrOnly = false }) {
   const { user } = useAuth()
   const now = new Date()
-  const isHr = user?.role === 'hr' || user?.role === 'superadmin'
+  const isHr = hrOnly || user?.role === 'hr' || user?.role === 'superadmin'
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [data, setData] = useState(null)
@@ -23,7 +23,7 @@ export default function Absence() {
   const [error, setError] = useState('')
   const [errorStatus, setErrorStatus] = useState(null)
 
-  const loadAttendance = useEffectEvent(async () => {
+  const loadAttendance = useCallback(async () => {
     setLoading(true)
     setError('')
     setErrorStatus(null)
@@ -43,11 +43,12 @@ export default function Absence() {
     } finally {
       setLoading(false)
     }
-  })
+  }, [isHr, month, setData, setError, setErrorStatus, setLoading, year])
 
   useEffect(() => {
-    loadAttendance()
-  }, [isHr, year, month])
+    const timer = setTimeout(loadAttendance, 0)
+    return () => clearTimeout(timer)
+  }, [loadAttendance])
 
   const years = []
   for (let current = now.getFullYear() - 3; current <= now.getFullYear() + 1; current += 1) years.push(current)

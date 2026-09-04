@@ -24,6 +24,7 @@ import Catalog from './pages/admin/Catalog'
 import Reports from './pages/admin/Reports'
 import Settings from './pages/admin/Settings'
 import HrDashboard from './pages/hr/Dashboard'
+import HrAttendance from './pages/hr/Attendance'
 
 export default function App() {
   return (
@@ -53,7 +54,7 @@ export default function App() {
           >
             <Route path="/hr/dashboard" element={<HrDashboard />} />
             <Route path="/hr/requests/:id" element={<RequestDetail />} />
-            <Route path="/hr/attendance" element={<Absence />} />
+            <Route path="/hr/attendance" element={<HrAttendance />} />
           </Route>
 
           <Route
