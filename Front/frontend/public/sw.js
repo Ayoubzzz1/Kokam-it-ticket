@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kokam-plus-shell-v2'
+const CACHE_NAME = 'kokam-plus-shell-v4'
 const APP_SHELL = ['/','/index.html','/manifest.webmanifest','/logo.PNG']
 
 self.addEventListener('install', (event) => {
@@ -18,7 +18,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url)
 
-  if (event.request.method !== 'GET' || requestUrl.pathname.startsWith('/api/')) return
+  if (
+    event.request.method !== 'GET' ||
+    !['http:', 'https:'].includes(requestUrl.protocol) ||
+    requestUrl.origin !== self.location.origin ||
+    requestUrl.pathname.startsWith('/api/')
+  ) return
 
   if (event.request.mode === 'navigate') {
     event.respondWith(
@@ -37,7 +42,11 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
       const copy = response.clone()
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy))
+      if (response.ok) {
+        caches.open(CACHE_NAME)
+          .then((cache) => cache.put(event.request, copy))
+          .catch(() => {})
+      }
       return response
     }))
   )

@@ -76,11 +76,11 @@ export default function Absence() {
       </div>
     </div>
     {error && <div className="alert error">{error}</div>}
-    {loading ? <p className="page-loading">Chargement…</p> : isHr ? <>
+    {loading ? <p className="page-loading">Chargement…</p> : isHr && !data ? <div className="empty-message">Les présences ne sont pas disponibles pour le moment.</div> : isHr ? <>
       <div className="stats attendance-stats"><div className="stat"><span>Présences saisies</span><strong>{totals.present}</strong></div><div className="stat"><span>Absences</span><strong>{totals.absent}</strong></div><div className="stat"><span>Congés</span><strong>{totals.leave}</strong></div><div className="stat"><span>Jours renseignés</span><strong>{totals.filled}</strong></div></div>
       <div className="attendance-guide"><span><b className="dot dot-present" /> P = Présent</span><span><b className="dot dot-absent" /> A = Absent</span><span><b className="dot dot-leave" /> C = Congé</span><span><b className="dot dot-holiday" /> F = Jour férié</span><span className="attendance-hint">Chaque jour est ouvert à la saisie</span></div>
-      <div className="table-wrap attendance-grid-wrap"><table className="attendance-grid"><thead><tr><th className="employee-column">Collaborateur</th>{data.dates.map((item) => <th key={item.date} title={item.weekday}>{dateLabel(item.date)}</th>)}<th>Total P</th><th>Total A</th></tr></thead><tbody>
-        {filteredRows.length === 0 && <tr><td colSpan={(data.dates?.length || 0) + 3}>Aucun collaborateur trouvé.</td></tr>}
+      <div className="table-wrap attendance-grid-wrap"><table className="attendance-grid"><thead><tr><th className="employee-column">Collaborateur</th>{(data?.dates || []).map((item) => <th key={item.date} title={item.weekday}>{dateLabel(item.date)}</th>)}<th>Total P</th><th>Total A</th></tr></thead><tbody>
+        {filteredRows.length === 0 && <tr><td colSpan={(data?.dates?.length || 0) + 3}>Aucun collaborateur trouvé.</td></tr>}
         {filteredRows.map((row) => <tr key={row.user}><th className="employee-column"><strong>{row.user_name}</strong><small>{row.department}</small></th>{row.days.map((cell) => {
           const key = `${row.user}-${cell.date}`
           return <td className={`attendance-cell presence-${cell.presence || 'empty'}`} key={cell.date}><select aria-label={`${row.user_name}, ${cell.date}`} value={cell.presence} disabled={saving === key} onChange={(e) => updateAttendance(row, cell, e.target.value)}><option value="">—</option>{PRESENCE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></td>
