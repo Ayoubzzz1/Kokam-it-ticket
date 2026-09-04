@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import api from '../../api/client'
 import { useAuth } from '../../context/AuthContext'
 import { PRESENCE_LABELS } from '../../utils/labels'
@@ -21,15 +21,32 @@ export default function Absence() {
   const [saving, setSaving] = useState(null)
   const [search, setSearch] = useState('')
   const [error, setError] = useState('')
+  const [errorStatus, setErrorStatus] = useState(null)
 
-  useEffect(() => {
+  const loadAttendance = useEffectEvent(async () => {
     setLoading(true)
     setError('')
+    setErrorStatus(null)
     const endpoint = isHr ? '/attendance/overview/' : '/attendance/calendar/'
-    api.get(endpoint, { params: { year, month } })
-      .then((res) => setData(res.data))
-      .catch(() => setError('Impossible de charger les présences.'))
-      .finally(() => setLoading(false))
+    try {
+      const response = await api.get(endpoint, { params: { year, month } })
+      setData(response.data)
+    } catch (err) {
+      console.error('Attendance fetch error:', err)
+      setData(null)
+      setErrorStatus(err.response?.status || null)
+      setError(err.response?.status === 401
+        ? 'Votre session a expiré. Reconnectez-vous pour consulter les présences.'
+        : err.response?.status === 405
+          ? 'Le serveur refuse la méthode GET pour cette route. Le backend doit être redéployé.'
+          : 'Impossible de charger les présences.')
+    } finally {
+      setLoading(false)
+    }
+  })
+
+  useEffect(() => {
+    loadAttendance()
   }, [isHr, year, month])
 
   const years = []
@@ -59,8 +76,9 @@ export default function Absence() {
         leave_days: item.leave_days + (presence === 'leave' ? 1 : 0) - (cell.presence === 'leave' ? 1 : 0),
         filled_days: item.filled_days + (presence ? 1 : 0) - (cell.presence ? 1 : 0),
       }) }))
-    } catch {
-      setError('Impossible d’enregistrer cette journée.')
+    } catch (error) {
+      console.error("Attendance update error:", error)
+      setError("Impossible d'enregistrer cette journée.")
     } finally {
       setSaving(null)
     }
@@ -68,14 +86,14 @@ export default function Absence() {
 
   return <div className="attendance-page">
     <div className="page-head">
-      <div><p className="eyebrow">{isHr ? 'Pilotage RH' : 'Mon suivi'}</p><h2>{isHr ? 'Présences de l’équipe' : 'Mon absence'}</h2></div>
+      <div><p className="eyebrow">{isHr ? "Pilotage RH" : "Mon suivi"}</p><h2>{isHr ? "Présences de l'équipe" : "Mon absence"}</h2></div>
       <div className="filters attendance-filters">
         {isHr && <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un collaborateur" />}
         <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>{MONTHS.map((name, index) => <option key={name} value={index + 1}>{name}</option>)}</select>
         <select value={year} onChange={(e) => setYear(Number(e.target.value))}>{years.map((item) => <option key={item} value={item}>{item}</option>)}</select>
       </div>
     </div>
-    {error && <div className="alert error">{error}</div>}
+    {error && <div className="alert error" role="alert"><div><strong>Erreur de chargement{errorStatus ? ` (${errorStatus})` : ''}</strong><div>{error}</div></div><button className="btn btn-secondary" type="button" onClick={loadAttendance}>Réessayer</button></div>}
     {loading ? <p className="page-loading">Chargement…</p> : isHr && !data ? <div className="empty-message">Les présences ne sont pas disponibles pour le moment.</div> : isHr ? <>
       <div className="stats attendance-stats"><div className="stat"><span>Présences saisies</span><strong>{totals.present}</strong></div><div className="stat"><span>Absences</span><strong>{totals.absent}</strong></div><div className="stat"><span>Congés</span><strong>{totals.leave}</strong></div><div className="stat"><span>Jours renseignés</span><strong>{totals.filled}</strong></div></div>
       <div className="attendance-guide"><span><b className="dot dot-present" /> P = Présent</span><span><b className="dot dot-absent" /> A = Absent</span><span><b className="dot dot-leave" /> C = Congé</span><span><b className="dot dot-holiday" /> F = Jour férié</span><span className="attendance-hint">Chaque jour est ouvert à la saisie</span></div>
@@ -97,5 +115,5 @@ function EmployeeCalendar({ data }) {
     if (day.presence === 'leave') result.leave += 1
     return result
   }, { present: 0, absent: 0, leave: 0 })
-  return <><div className="stats attendance-stats"><div className="stat"><span>Présent</span><strong>{summary.present}</strong></div><div className="stat"><span>Absent</span><strong>{summary.absent}</strong></div><div className="stat"><span>Congé</span><strong>{summary.leave}</strong></div></div><div className="table-wrap"><table><thead><tr><th>Date</th><th>Jour</th><th>Statut</th><th>Note RH</th></tr></thead><tbody>{data?.days?.map((day) => <tr key={day.date}><td>{new Date(`${day.date}T00:00:00`).toLocaleDateString('fr-FR')}</td><td>{day.weekday}</td><td>{day.presence ? <span className={`badge presence-${day.presence}`}>{PRESENCE_LABELS[day.presence] || day.presence_label}</span> : <span className="muted">Non renseigné</span>}</td><td>{day.note || '—'}</td></tr>)}</tbody></table></div></>
+  return <><div className="stats attendance-stats"><div className="stat"><span>Présent</span><strong>{summary.present}</strong></div><div className="stat"><span>Absent</span><strong>{summary.absent}</strong></div><div className="stat"><span>Congé</span><strong>{summary.leave}</strong></div></div><div className="table-wrap"><table><thead><tr><th>Date</th><th>Jour</th><th>Statut</th><th>Note RH</th></tr></thead><tbody>{data?.days?.map((day) => <tr key={day.date}><td>{new Date(`${day.date}T00:00:00`).toLocaleDateString('fr-FR')}</td><td>{day.weekday}</td><td>{day.presence ? <span className={`badge presence-${day.presence}`}>{PRESENCE_LABELS[day.presence] || day.presence_label}</span> : <span className="muted">Non renseigné</span>}</td><td>{day.note || "—"}</td></tr>)}</tbody></table></div></>
 }
