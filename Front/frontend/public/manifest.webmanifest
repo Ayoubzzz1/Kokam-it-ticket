@@ -1,0 +1,25 @@
+{
+  "name": "KOKAM PLUS IT Helpdesk",
+  "short_name": "KOKAM PLUS",
+  "description": "Support informatique et gestion des demandes KOKAM PLUS",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#10233f",
+  "theme_color": "#10233f",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/logo.PNG",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.PNG",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
